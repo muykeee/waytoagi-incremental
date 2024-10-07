@@ -203,7 +203,7 @@
                 <button onclick="upgrade('quantumAcceleration')">升级</button>
             </div>
         </div>
-        <button onclick="resetGame()" id="resetButton">重置游戏</button>
+        <button onclick="resetGame()">重置游戏</button>
         <div id="winMessage">
             <h2>恭喜！您已经达到全面AGI！</h2>
             <button onclick="continueGame()">继续游戏</button>
@@ -339,6 +339,7 @@
             checkWinCondition();
         }
 
+        // 添加移动设备的 touch 支持
         researchButton.addEventListener('mousedown', function() {
             isResearching = true;
             doResearch();
@@ -355,6 +356,18 @@
                 isResearching = false;
                 clearInterval(researchInterval);
             }
+        });
+
+        // 添加移动设备上的 touchstart 和 touchend 事件
+        researchButton.addEventListener('touchstart', function() {
+            isResearching = true;
+            doResearch();
+            researchInterval = setInterval(doResearch, 100);
+        });
+
+        researchButton.addEventListener('touchend', function() {
+            isResearching = false;
+            clearInterval(researchInterval);
         });
 
         // 保存和加载游戏功能
