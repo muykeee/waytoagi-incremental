@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AGI研究进展</title>
+    <title>通往AGI之路</title>
     <style>
         body {
             display: flex;
@@ -76,49 +76,49 @@
 </head>
 <body>
     <div id="game-container">
-        <h1>AGI研究进展</h1>
+        <h1>通往AGI之路</h1>
         <canvas id="spiral" width="400" height="400"></canvas>
         <p>研究点数: <span id="researchPoints">0</span></p>
         <p>每秒研究点数: <span id="pointsPerSecond">1.00</span></p>
         <button id="research">研究</button>
         <div id="upgrades">
             <div class="upgrade">
-                <h3>基础研究 (a)</h3>
+                <h3>神经网络架构 (a)</h3>
                 <p>等级: <span id="aLevel">0</span></p>
                 <p>效果: +<span id="aEffect">1</span> 点/次</p>
                 <p>成本: <span id="aCost">10</span> 点</p>
                 <button onclick="buyUpgrade('a')">升级</button>
             </div>
             <div class="upgrade">
-                <h3>研究效率 (b)</h3>
+                <h3>算法优化 (b)</h3>
                 <p>等级: <span id="bLevel">0</span></p>
                 <p>效果: x<span id="bEffect">1.00</span> 倍率</p>
                 <p>成本: <span id="bCost">50</span> 点</p>
                 <button onclick="buyUpgrade('b')">升级</button>
             </div>
             <div class="upgrade">
-                <h3>自动化研究 (c)</h3>
+                <h3>数据处理能力 (c)</h3>
                 <p>等级: <span id="cLevel">0</span></p>
                 <p>效果: +<span id="cEffect">0</span> 点/秒</p>
                 <p>成本: <span id="cCost">100</span> 点</p>
                 <button onclick="buyUpgrade('c')">升级</button>
             </div>
             <div class="upgrade">
-                <h3>自动化效率 (d)</h3>
+                <h3>并行计算 (d)</h3>
                 <p>等级: <span id="dLevel">0</span></p>
                 <p>效果: x<span id="dEffect">1.00</span> 倍率</p>
                 <p>成本: <span id="dCost">200</span> 点</p>
                 <button onclick="buyUpgrade('d')">升级</button>
             </div>
             <div class="upgrade">
-                <h3>突破性研究 (e)</h3>
+                <h3>认知突破 (e)</h3>
                 <p>等级: <span id="eLevel">0</span></p>
                 <p>效果: x<span id="eEffect">1.00</span> 总倍率</p>
                 <p>成本: <span id="eCost">1000</span> 点</p>
                 <button onclick="buyUpgrade('e')">升级</button>
             </div>
             <div class="upgrade">
-                <h3>自动化速率 (f)</h3>
+                <h3>量子加速 (f)</h3>
                 <p>等级: <span id="fLevel">0</span></p>
                 <p>效果: <span id="fEffect">1.00</span> 次/秒</p>
                 <p>成本: <span id="fCost">5000</span> 点</p>
