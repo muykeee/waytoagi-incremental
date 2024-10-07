@@ -227,6 +227,8 @@
             quantumAcceleration: { level: 0, effect: 1, cost: 5000, growth: 1.1 }
         };
 
+        let gameWon = false; // 标志是否已经达成胜利
+
         function updateDisplay() {
             document.getElementById('points').textContent = Math.floor(points).toLocaleString();
             document.getElementById('pointsPerClick').textContent = pointsPerClick.toFixed(2);
@@ -279,8 +281,10 @@
         }
 
         function checkWinCondition() {
-            if (points >= GOAL && document.getElementById('winMessage').style.display === 'none') {
-                document.getElementById('winMessage').style.display = 'block';
+            // 检查是否已经达成胜利条件，并且之前没有触发过胜利
+            if (points >= GOAL && !gameWon) {
+                gameWon = true;
+                document.getElementById('winMessage').style.display = 'block'; // 显示胜利信息
             }
         }
 
@@ -378,7 +382,8 @@
                 pointsPerSecond: pointsPerSecond,
                 timeAcceleration: timeAcceleration,
                 upgrades: upgrades,
-                time: time
+                time: time,
+                gameWon: gameWon // 保存是否已经胜利
             };
             localStorage.setItem('agiGameState', JSON.stringify(gameState));
         }
@@ -393,6 +398,7 @@
                 timeAcceleration = gameState.timeAcceleration;
                 upgrades = gameState.upgrades;
                 time = gameState.time;
+                gameWon = gameState.gameWon; // 恢复胜利状态
                 updateDisplay();
                 drawSpiral();
             }
