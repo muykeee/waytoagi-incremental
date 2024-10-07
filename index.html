@@ -223,7 +223,7 @@
             algorithm: { level: 0, effect: 1, cost: 50, growth: 1.1 },
             dataProcessing: { level: 0, effect: 1, cost: 100, growth: 1.1 },
             parallelComputing: { level: 0, effect: 1, cost: 200, growth: 1.1 },
-            cognitiveBreakthrough: { level: 0, effect: 1, cost: 1000, growth: 1.1 },
+            cognitiveBreakthrough: { level: 0, effect: 1, cost: 1000, growth: 1.5 },
             quantumAcceleration: { level: 0, effect: 1, cost: 5000, growth: 1.5 }
         };
 
@@ -248,7 +248,7 @@
                 upgrades[type].level++;
                 upgrades[type].cost *= upgrades[type].growth;
                 if (type === 'neuralNetwork') upgrades[type].effect++;
-                else if (type === 'algorithm' || type === 'parallelComputing' || type === 'cognitiveBreakthrough') upgrades[type].effect *= 1.1;
+                else if (type === 'algorithm' || type === 'parallelComputing' || type === 'cognitiveBreakthrough') upgrades[type].effect *= 1.05;
                 else if (type === 'dataProcessing') upgrades[type].effect++;
                 else if (type === 'quantumAcceleration') upgrades[type].effect *= 1.05;
                 calculatePointsPerSecond();
