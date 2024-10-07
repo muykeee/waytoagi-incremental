@@ -72,6 +72,32 @@
             color: #4a90e2;
             margin-top: 0;
         }
+        #endGameModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        #endGameContent {
+            background-color: #2a2a2a;
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        #endGameContent p {
+            font-size: 24px;
+            color: #ffffff;
+        }
+        #endGameContent button {
+            font-size: 18px;
+            padding: 10px 20px;
+        }
     </style>
 </head>
 <body>
@@ -83,42 +109,42 @@
         <button id="research">研究</button>
         <div id="upgrades">
             <div class="upgrade">
-                <h3>神经网络架构 (a)</h3>
+                <h3>神经网络架构</h3>
                 <p>等级: <span id="aLevel">0</span></p>
                 <p>效果: +<span id="aEffect">1</span> 点/次</p>
                 <p>成本: <span id="aCost">10</span> 点</p>
                 <button onclick="buyUpgrade('a')">升级</button>
             </div>
             <div class="upgrade">
-                <h3>算法优化 (b)</h3>
+                <h3>算法优化</h3>
                 <p>等级: <span id="bLevel">0</span></p>
                 <p>效果: x<span id="bEffect">1.00</span> 倍率</p>
                 <p>成本: <span id="bCost">50</span> 点</p>
                 <button onclick="buyUpgrade('b')">升级</button>
             </div>
             <div class="upgrade">
-                <h3>数据处理能力 (c)</h3>
+                <h3>数据处理能力</h3>
                 <p>等级: <span id="cLevel">0</span></p>
                 <p>效果: +<span id="cEffect">0</span> 点/秒</p>
                 <p>成本: <span id="cCost">100</span> 点</p>
                 <button onclick="buyUpgrade('c')">升级</button>
             </div>
             <div class="upgrade">
-                <h3>并行计算 (d)</h3>
+                <h3>并行计算</h3>
                 <p>等级: <span id="dLevel">0</span></p>
                 <p>效果: x<span id="dEffect">1.00</span> 倍率</p>
                 <p>成本: <span id="dCost">200</span> 点</p>
                 <button onclick="buyUpgrade('d')">升级</button>
             </div>
             <div class="upgrade">
-                <h3>认知突破 (e)</h3>
+                <h3>认知突破</h3>
                 <p>等级: <span id="eLevel">0</span></p>
                 <p>效果: x<span id="eEffect">1.00</span> 总倍率</p>
                 <p>成本: <span id="eCost">1000</span> 点</p>
                 <button onclick="buyUpgrade('e')">升级</button>
             </div>
             <div class="upgrade">
-                <h3>量子加速 (f)</h3>
+                <h3>量子加速</h3>
                 <p>等级: <span id="fLevel">0</span></p>
                 <p>效果: <span id="fEffect">1.00</span> 次/秒</p>
                 <p>成本: <span id="fCost">5000</span> 点</p>
@@ -127,9 +153,20 @@
         </div>
     </div>
 
+    <!-- 游戏结束模态框 -->
+    <div id="endGameModal">
+        <div id="endGameContent">
+            <p id="endGameMessage">已经达到全面AGI！</p>
+            <button id="continueGame">继续游戏</button>
+            <button id="endGame">结束游戏</button>
+        </div>
+    </div>
+
     <script>
         let researchPoints = 0;
         let animationFrame = null;
+        const goalPoints = 100000000; // 1亿点研究目标
+        let startTime = Date.now(); // 游戏开始时间
 
         const canvas = document.getElementById('spiral');
         const ctx = canvas.getContext('2d');
@@ -181,6 +218,7 @@
 
         function research() {
             researchPoints += getPointsPerClick();
+            checkGameEnd();
             updateDisplay();
         }
 
@@ -215,8 +253,49 @@
 
         function autoResearch() {
             researchPoints += getPointsPerSecond() / 10; // 每0.1秒增加十分之一的每秒点数
+            checkGameEnd();
             updateDisplay();
         }
+
+        // 检查是否达到目标点数
+        function checkGameEnd() {
+            if (researchPoints >= goalPoints) {
+                endGame();
+            }
+        }
+
+        // 结束游戏，显示模态框
+        function endGame() {
+            document.getElementById('endGameModal').style.display = 'flex';
+            clearInterval(autoResearchInterval); // 停止自动研究
+            cancelAnimationFrame(animationFrame); // 停止动画
+
+            const timeSpent = formatTimeSpent(Date.now() - startTime); // 计算花费时间
+            document.getElementById('endGameMessage').textContent = `已经达到全面AGI！你花费了 ${timeSpent} 完成游戏。`;
+        }
+
+        // 格式化时间为 'xx小时xx分xx秒'
+        function formatTimeSpent(milliseconds) {
+            const seconds = Math.floor(milliseconds / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const remainingMinutes = minutes % 60;
+            const remainingSeconds = seconds % 60;
+            return `${hours}小时${remainingMinutes}分${remainingSeconds}秒`;
+        }
+
+        // 继续游戏
+        document.getElementById('continueGame').addEventListener('click', function() {
+            document.getElementById('endGameModal').style.display = 'none';
+            autoResearchInterval = setInterval(autoResearch, 100); // 恢复自动研究
+            animationFrame = requestAnimationFrame(drawSpiral); // 恢复动画
+        });
+
+        // 结束游戏
+        document.getElementById('endGame').addEventListener('click', function() {
+            alert('游戏结束！感谢你的游玩！');
+            window.location.reload(); // 重新加载页面，重置游戏
+        });
 
         researchButton.addEventListener('mousedown', function() {
             research();
@@ -242,7 +321,7 @@
             clearInterval(this.interval);
         });
 
-        setInterval(autoResearch, 100); // 每0.1秒执行一次自动研究
+        let autoResearchInterval = setInterval(autoResearch, 100); // 每0.1秒执行一次自动研究
         updateDisplay();
         animationFrame = requestAnimationFrame(drawSpiral);
     </script>
