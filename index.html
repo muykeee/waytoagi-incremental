@@ -189,40 +189,45 @@
             f: { level: 0, effect: 1, cost: 5000, increment: 0.1 }
         };
 
-function drawSpiral(time) {
+function drawSpiral() {
     // 清空画布
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 控制螺旋增长的因子（基于时间和研究点数）
-    const angleSpeed = 0.01 + researchPoints * 0.001; // 研究点数越多，螺旋增长越快
-    const currentAngle = time * angleSpeed; // 随时间不断增加角度
+    // 控制螺旋增长的因子（基于 researchPoints）
+    const angleFactor = researchPoints * 0.1; // 研究点数越多，螺旋增长越快
 
     // 螺旋中心
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
 
-    // 控制螺旋的半径增长速度
-    const a = 10; // 控制初始半径
-    const b = 0.1; // 控制螺旋的扩散率
+    // 控制螺旋的半径增长速度（线性增长）
+    const a = 5;  // 控制初始半径
+    const b = 0.5;  // 控制螺旋的扩展速率
+
+    // 设置最大半径，防止螺旋跑出画布
+    const maxRadiusLimit = Math.min(centerX, centerY) - 10;
 
     // 绘制螺旋
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
-
-    // 开始路径绘制
     ctx.beginPath();
 
-    // 动态控制螺旋的增长步长，使得螺旋线可以无限延伸
-    for (let angle = 0; angle <= currentAngle; angle += 0.1) {
-        // 计算螺旋半径
-        const r = Math.exp(b * angle) * a;
+    // 根据 researchPoints 控制螺旋角度范围
+    const maxAngle = angleFactor; // 最大角度由 researchPoints 决定
+
+    for (let angle = 0; angle <= maxAngle; angle += 0.1) {
+        // 线性增长的半径公式，确保螺旋线不会扩展得太快
+        let r = a + b * angle;
+
+        // 限制最大半径
+        r = Math.min(r, maxRadiusLimit);
 
         // 计算螺旋的 x, y 坐标
         const x = centerX + r * Math.cos(angle);
         const y = centerY + r * Math.sin(angle);
 
-        // 设置颜色，根据角度和时间变化
-        const hue = (angle * 10 + time / 50) % 360;
+        // 设置颜色，随角度变化
+        const hue = (angle * 10) % 360;
         const lightness = 50 + Math.sin(angle * 0.1) * 20;
         ctx.strokeStyle = `hsl(${hue}, 100%, ${lightness}%)`;
 
