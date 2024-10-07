@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGI研究进展</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+        }
+        #game-container {
+            text-align: center;
+            width: 90%;
+            max-width: 800px;
+            padding: 20px;
+            background-color: #2a2a2a;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+        #spiral {
+            width: 400px;
+            height: 400px;
+            margin: 20px auto;
+        }
+        button {
+            font-size: 14px;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            background-color: #4a4a4a;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            user-select: none;
+        }
+        button:hover {
+            background-color: #5a5a5a;
+        }
+        #research {
+            font-size: 18px;
+            padding: 15px 30px;
+        }
+        #upgrades {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+        .upgrade {
+            margin: 10px;
+            padding: 15px;
+            border: 1px solid #3a3a3a;
+            border-radius: 5px;
+            width: 180px;
+            background-color: #333333;
+            transition: background-color 0.3s;
+        }
+        .upgrade:hover {
+            background-color: #3a3a3a;
+        }
+        h1 {
+            color: #4a90e2;
+        }
+        h3 {
+            color: #4a90e2;
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>AGI研究进展</h1>
+        <canvas id="spiral" width="400" height="400"></canvas>
+        <p>研究点数: <span id="researchPoints">0</span></p>
+        <p>每秒研究点数: <span id="pointsPerSecond">1.00</span></p>
+        <button id="research">研究</button>
+        <div id="upgrades">
+            <div class="upgrade">
+                <h3>基础研究 (a)</h3>
+                <p>等级: <span id="aLevel">0</span></p>
+                <p>效果: +<span id="aEffect">1</span> 点/次</p>
+                <p>成本: <span id="aCost">10</span> 点</p>
+                <button onclick="buyUpgrade('a')">升级</button>
+            </div>
+            <div class="upgrade">
+                <h3>研究效率 (b)</h3>
+                <p>等级: <span id="bLevel">0</span></p>
+                <p>效果: x<span id="bEffect">1.00</span> 倍率</p>
+                <p>成本: <span id="bCost">50</span> 点</p>
+                <button onclick="buyUpgrade('b')">升级</button>
+            </div>
+            <div class="upgrade">
+                <h3>自动化研究 (c)</h3>
+                <p>等级: <span id="cLevel">0</span></p>
+                <p>效果: +<span id="cEffect">0</span> 点/秒</p>
+                <p>成本: <span id="cCost">100</span> 点</p>
+                <button onclick="buyUpgrade('c')">升级</button>
+            </div>
+            <div class="upgrade">
+                <h3>自动化效率 (d)</h3>
+                <p>等级: <span id="dLevel">0</span></p>
+                <p>效果: x<span id="dEffect">1.00</span> 倍率</p>
+                <p>成本: <span id="dCost">200</span> 点</p>
+                <button onclick="buyUpgrade('d')">升级</button>
+            </div>
+            <div class="upgrade">
+                <h3>突破性研究 (e)</h3>
+                <p>等级: <span id="eLevel">0</span></p>
+                <p>效果: x<span id="eEffect">1.00</span> 总倍率</p>
+                <p>成本: <span id="eCost">1000</span> 点</p>
+                <button onclick="buyUpgrade('e')">升级</button>
+            </div>
+            <div class="upgrade">
+                <h3>自动化速率 (f)</h3>
+                <p>等级: <span id="fLevel">0</span></p>
+                <p>效果: <span id="fEffect">1.00</span> 次/秒</p>
+                <p>成本: <span id="fCost">5000</span> 点</p>
+                <button onclick="buyUpgrade('f')">升级</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let researchPoints = 0;
+        let animationFrame = null;
+
+        const canvas = document.getElementById('spiral');
+        const ctx = canvas.getContext('2d');
+        const researchPointsDisplay = document.getElementById('researchPoints');
+        const pointsPerSecondDisplay = document.getElementById('pointsPerSecond');
+        const researchButton = document.getElementById('research');
+
+        const upgrades = {
+            a: { level: 0, effect: 1, cost: 10, increment: 1 },
+            b: { level: 0, effect: 1, cost: 50, increment: 0.1 },
+            c: { level: 0, effect: 0, cost: 100, increment: 1 },
+            d: { level: 0, effect: 1, cost: 200, increment: 0.1 },
+            e: { level: 0, effect: 1, cost: 1000, increment: 0.1 },
+            f: { level: 0, effect: 1, cost: 5000, increment: 0.1 }
+        };
+
+        function drawSpiral(time) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const a = 10 + upgrades.a.level;
+            const b = 0.1 + upgrades.b.level * 0.01;
+            const maxAngle = researchPoints * 0.01 * (1 + upgrades.c.level * 0.1);
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+
+            const maxRadius = Math.exp(b * maxAngle) * a;
+            const scale = Math.min(centerX, centerY) / maxRadius;
+
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+
+            for (let angle = 0; angle <= maxAngle; angle += 0.1) {
+                const r = Math.exp(b * angle) * a * scale;
+                const x = centerX + r * Math.cos(angle);
+                const y = centerY + r * Math.sin(angle);
+
+                const hue = (angle * 10 + time / 50) % 360;
+                const lightness = 50 + Math.sin(angle * 0.1) * 20;
+                ctx.strokeStyle = `hsl(${hue}, 100%, ${lightness}%)`;
+
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            }
+
+            animationFrame = requestAnimationFrame(drawSpiral);
+        }
+
+        function research() {
+            researchPoints += getPointsPerClick();
+            updateDisplay();
+        }
+
+        function getPointsPerClick() {
+            return upgrades.a.effect * upgrades.b.effect * upgrades.e.effect;
+        }
+
+        function getPointsPerSecond() {
+            return upgrades.c.effect * upgrades.d.effect * upgrades.e.effect * upgrades.f.effect;
+        }
+
+        function updateDisplay() {
+            researchPointsDisplay.textContent = Math.floor(researchPoints);
+            pointsPerSecondDisplay.textContent = getPointsPerSecond().toFixed(2);
+            for (const [key, upgrade] of Object.entries(upgrades)) {
+                document.getElementById(`${key}Level`).textContent = upgrade.level;
+                document.getElementById(`${key}Effect`).textContent = upgrade.effect.toFixed(2);
+                document.getElementById(`${key}Cost`).textContent = Math.floor(upgrade.cost);
+            }
+        }
+
+        function buyUpgrade(type) {
+            const upgrade = upgrades[type];
+            if (researchPoints >= upgrade.cost) {
+                researchPoints -= upgrade.cost;
+                upgrade.level++;
+                upgrade.effect += upgrade.increment;
+                upgrade.cost *= 1.5;
+                updateDisplay();
+            }
+        }
+
+        function autoResearch() {
+            researchPoints += getPointsPerSecond() / 10; // 每0.1秒增加十分之一的每秒点数
+            updateDisplay();
+        }
+
+        researchButton.addEventListener('mousedown', function() {
+            research();
+            this.interval = setInterval(research, 100);
+        });
+
+        researchButton.addEventListener('mouseup', function() {
+            clearInterval(this.interval);
+        });
+
+        researchButton.addEventListener('mouseleave', function() {
+            clearInterval(this.interval);
+        });
+
+        // 触摸设备支持
+        researchButton.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            research();
+            this.interval = setInterval(research, 100);
+        });
+
+        researchButton.addEventListener('touchend', function() {
+            clearInterval(this.interval);
+        });
+
+        setInterval(autoResearch, 100); // 每0.1秒执行一次自动研究
+        updateDisplay();
+        animationFrame = requestAnimationFrame(drawSpiral);
+    </script>
+</body>
+</html>
