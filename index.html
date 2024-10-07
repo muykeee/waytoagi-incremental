@@ -199,7 +199,7 @@
     const researchSpeedFactor = researchPoints * 0.01 * (1 + upgrades.c.level * 0.1);
 
     // 设置最大旋转速度限制（例如 500 角度单位）
-    const maxRotationSpeedLimit = 500;
+    const maxRotationSpeedLimit = 50;
 
     // 限制螺旋的旋转速度，确保不会超过最大速度
     const maxAngle = Math.min(researchSpeedFactor, maxRotationSpeedLimit);
