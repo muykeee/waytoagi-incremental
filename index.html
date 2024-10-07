@@ -112,15 +112,33 @@
             color: #64ffda;
             margin-bottom: 15px;
         }
-        
-        .goal-container h2 {
-            color: #64ffda;
-            margin-bottom: 10px;
-            font-size: 18px;
+        #winModal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
         }
-        .goal-container p {
-            margin: 5px 0;
-            font-size: 15px;
+        #winModalContent {
+            background-color: #112240;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            color: #64ffda;
+        }
+        #winModalContent h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        #winModalContent p {
+            margin-bottom: 20px;
         }
         @media (max-width: 600px) {
             .upgrade {
@@ -204,10 +222,15 @@
             </div>
         </div>
         <button onclick="resetGame()">重置游戏</button>
-        <div id="winMessage">
+    </div>
+
+    <!-- 胜利模态对话框 -->
+    <div id="winModal">
+        <div id="winModalContent">
             <h2>恭喜！您已经达到全面AGI！</h2>
+            <p>花费时间: <span id="timeSpent"></span> 秒</p>
             <button onclick="continueGame()">继续游戏</button>
-            <button onclick="endGame()">结束游戏</button>
+            <button onclick="resetGame()">结束游戏</button>
         </div>
     </div>
 
@@ -228,6 +251,7 @@
         };
 
         let gameWon = false; // 标志是否已经达成胜利
+        let gamePaused = false; // 用于暂停游戏
 
         function updateDisplay() {
             document.getElementById('points').textContent = Math.floor(points).toLocaleString();
@@ -273,28 +297,38 @@
         }
 
         function gameLoop() {
-            points += (pointsPerSecond * timeAcceleration) / 10;
-            time += timeAcceleration / 100;
-            updateDisplay();
-            drawSpiral();
-            checkWinCondition();
-        }
-
-        function checkWinCondition() {
-            // 检查是否已经达成胜利条件，并且之前没有触发过胜利
-            if (points >= GOAL && !gameWon) {
-                gameWon = true;
-                document.getElementById('winMessage').style.display = 'block'; // 显示胜利信息
+            if (!gamePaused) {
+                points += (pointsPerSecond * timeAcceleration) / 10;
+                time += timeAcceleration / 100;
+                updateDisplay();
+                drawSpiral();
+                checkWinCondition();
             }
         }
 
-        function continueGame() {
-            document.getElementById('winMessage').style.display = 'none';
+        function checkWinCondition() {
+            if (points >= GOAL && !gameWon) {
+                gameWon = true;
+                gamePaused = true; // 暂停游戏
+                showWinModal(); // 显示胜利模态框
+            }
         }
 
-        function endGame() {
-            alert('感谢您踏上通往AGI之路！');
-            location.reload();
+        function showWinModal() {
+            document.getElementById('timeSpent').textContent = Math.floor(time);
+            document.getElementById('winModal').style.display = 'flex';
+        }
+
+        function continueGame() {
+            document.getElementById('winModal').style.display = 'none';
+            gamePaused = false;
+        }
+
+        function resetGame() {
+            if (confirm('确定要重置游戏吗？所有进度将丢失。')) {
+                localStorage.removeItem('agiGameState');
+                location.reload();
+            }
         }
 
         function drawSpiral() {
@@ -343,7 +377,6 @@
             checkWinCondition();
         }
 
-        // 添加移动设备的 touch 支持
         researchButton.addEventListener('mousedown', function() {
             isResearching = true;
             doResearch();
@@ -362,7 +395,6 @@
             }
         });
 
-        // 添加移动设备上的 touchstart 和 touchend 事件
         researchButton.addEventListener('touchstart', function() {
             isResearching = true;
             doResearch();
@@ -374,7 +406,6 @@
             clearInterval(researchInterval);
         });
 
-        // 保存和加载游戏功能
         function saveGame() {
             const gameState = {
                 points: points,
@@ -383,7 +414,7 @@
                 timeAcceleration: timeAcceleration,
                 upgrades: upgrades,
                 time: time,
-                gameWon: gameWon // 保存是否已经胜利
+                gameWon: gameWon 
             };
             localStorage.setItem('agiGameState', JSON.stringify(gameState));
         }
@@ -398,23 +429,14 @@
                 timeAcceleration = gameState.timeAcceleration;
                 upgrades = gameState.upgrades;
                 time = gameState.time;
-                gameWon = gameState.gameWon; // 恢复胜利状态
+                gameWon = gameState.gameWon; 
                 updateDisplay();
                 drawSpiral();
             }
         }
 
-        function resetGame() {
-            if (confirm('确定要重置游戏吗？所有进度将丢失。')) {
-                localStorage.removeItem('agiGameState');
-                location.reload();
-            }
-        }
-
-        // 页面加载时恢复进度
         window.onload = loadGame;
 
-        // 每隔10秒保存一次游戏进度
         setInterval(saveGame, 10000);
 
         setInterval(gameLoop, 100);
