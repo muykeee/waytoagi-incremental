@@ -113,6 +113,7 @@
                 <p>等级: <span id="aLevel">0</span></p>
                 <p>效果: +<span id="aEffect">1</span> 点/次</p>
                 <p>成本: <span id="aCost">10</span> 点</p>
+                <p>成本增长: 10%</p> <!-- 添加成本增长提示 -->
                 <button onclick="buyUpgrade('a')">升级</button>
             </div>
             <div class="upgrade">
@@ -120,13 +121,15 @@
                 <p>等级: <span id="bLevel">0</span></p>
                 <p>效果: x<span id="bEffect">1.00</span> 倍率</p>
                 <p>成本: <span id="bCost">50</span> 点</p>
+                <p>成本增长: 10%</p> <!-- 添加成本增长提示 -->
                 <button onclick="buyUpgrade('b')">升级</button>
             </div>
             <div class="upgrade">
                 <h3>数据处理能力</h3>
                 <p>等级: <span id="cLevel">0</span></p>
-                <p>效果: +<span id="cEffect">0</span> 点/秒</p>
+                <p>效果: +<span id="cEffect">1</span> 点/秒</p>
                 <p>成本: <span id="cCost">100</span> 点</p>
+                <p>成本增长: 10%</p> <!-- 添加成本增长提示 -->
                 <button onclick="buyUpgrade('c')">升级</button>
             </div>
             <div class="upgrade">
@@ -134,6 +137,7 @@
                 <p>等级: <span id="dLevel">0</span></p>
                 <p>效果: x<span id="dEffect">1.00</span> 倍率</p>
                 <p>成本: <span id="dCost">200</span> 点</p>
+                <p>成本增长: 10%</p> <!-- 添加成本增长提示 -->
                 <button onclick="buyUpgrade('d')">升级</button>
             </div>
             <div class="upgrade">
@@ -141,6 +145,7 @@
                 <p>等级: <span id="eLevel">0</span></p>
                 <p>效果: x<span id="eEffect">1.00</span> 总倍率</p>
                 <p>成本: <span id="eCost">1000</span> 点</p>
+                <p>成本增长: 10%</p> <!-- 添加成本增长提示 -->
                 <button onclick="buyUpgrade('e')">升级</button>
             </div>
             <div class="upgrade">
@@ -148,6 +153,7 @@
                 <p>等级: <span id="fLevel">0</span></p>
                 <p>效果: <span id="fEffect">1.00</span> 次/秒</p>
                 <p>成本: <span id="fCost">5000</span> 点</p>
+                <p>成本增长: 10%</p> <!-- 添加成本增长提示 -->
                 <button onclick="buyUpgrade('f')">升级</button>
             </div>
         </div>
@@ -177,44 +183,53 @@
         const upgrades = {
             a: { level: 0, effect: 1, cost: 10, increment: 1 },
             b: { level: 0, effect: 1, cost: 50, increment: 0.1 },
-            c: { level: 0, effect: 0, cost: 100, increment: 1 },
+            c: { level: 0, effect: 1, cost: 100, increment: 1 }, // 初始效果为 +1 点/秒
             d: { level: 0, effect: 1, cost: 200, increment: 0.1 },
             e: { level: 0, effect: 1, cost: 1000, increment: 0.1 },
             f: { level: 0, effect: 1, cost: 5000, increment: 0.1 }
         };
 
-        function drawSpiral(time) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            const a = 10 + upgrades.a.level;
-            const b = 0.1 + upgrades.b.level * 0.01;
-            const maxAngle = researchPoints * 0.01 * (1 + upgrades.c.level * 0.1);
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
+       function drawSpiral(time) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            const maxRadius = Math.exp(b * maxAngle) * a;
-            const scale = Math.min(centerX, centerY) / maxRadius;
+    const a = 10 + upgrades.a.level;
+    const b = 0.1 + upgrades.b.level * 0.01;
 
-            ctx.lineWidth = 2;
-            ctx.lineCap = 'round';
+    // 根据研究点数计算旋转速度，但加上限制
+    const researchSpeedFactor = researchPoints * 0.01 * (1 + upgrades.c.level * 0.1);
 
-            for (let angle = 0; angle <= maxAngle; angle += 0.1) {
-                const r = Math.exp(b * angle) * a * scale;
-                const x = centerX + r * Math.cos(angle);
-                const y = centerY + r * Math.sin(angle);
+    // 设置最大旋转速度限制（例如 500 角度单位）
+    const maxRotationSpeedLimit = 500;
 
-                const hue = (angle * 10 + time / 50) % 360;
-                const lightness = 50 + Math.sin(angle * 0.1) * 20;
-                ctx.strokeStyle = `hsl(${hue}, 100%, ${lightness}%)`;
+    // 限制螺旋的旋转速度，确保不会超过最大速度
+    const maxAngle = Math.min(researchSpeedFactor, maxRotationSpeedLimit);
 
-                ctx.beginPath();
-                ctx.moveTo(centerX, centerY);
-                ctx.lineTo(x, y);
-                ctx.stroke();
-            }
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
 
-            animationFrame = requestAnimationFrame(drawSpiral);
-        }
+    const maxRadius = Math.exp(b * maxAngle) * a;
+    const scale = Math.min(centerX, centerY) / maxRadius;
+
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+
+    for (let angle = 0; angle <= maxAngle; angle += 0.1) {
+        const r = Math.exp(b * angle) * a * scale;
+        const x = centerX + r * Math.cos(angle);
+        const y = centerY + r * Math.sin(angle);
+
+        const hue = (angle * 10 + time / 50) % 360;
+        const lightness = 50 + Math.sin(angle * 0.1) * 20;
+        ctx.strokeStyle = `hsl(${hue}, 100%, ${lightness}%)`;
+
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+    }
+
+    animationFrame = requestAnimationFrame(drawSpiral);
+}
 
         function research() {
             researchPoints += getPointsPerClick();
@@ -246,7 +261,7 @@
                 researchPoints -= upgrade.cost;
                 upgrade.level++;
                 upgrade.effect += upgrade.increment;
-                upgrade.cost *= 1.5;
+                upgrade.cost *= 1.1; // 成本倍率调整为1.10（每次升级后增加10%）
                 updateDisplay();
             }
         }
