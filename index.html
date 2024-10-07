@@ -6,374 +6,393 @@
     <title>通往AGI之路</title>
     <style>
         body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            background-color: #1a1a1a;
-            color: #ffffff;
-            font-family: Arial, sans-serif;
-        }
-        #game-container {
-            text-align: center;
-            width: 90%;
-            max-width: 800px;
+            background-color: #0a192f;
+            color: #8892b0;
             padding: 20px;
-            background-color: #2a2a2a;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+            box-sizing: border-box;
         }
-        #spiral {
-            width: 400px;
-            height: 400px;
-            margin: 20px auto;
-        }
-        button {
-            font-size: 14px;
-            padding: 10px 20px;
-            margin: 5px;
-            cursor: pointer;
-            background-color: #4a4a4a;
-            color: #ffffff;
-            border: none;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-            user-select: none;
-        }
-        button:hover {
-            background-color: #5a5a5a;
-        }
-        #research {
-            font-size: 18px;
-            padding: 15px 30px;
-        }
-        #upgrades {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-        }
-        .upgrade {
-            margin: 10px;
-            padding: 15px;
-            border: 1px solid #3a3a3a;
-            border-radius: 5px;
-            width: 180px;
-            background-color: #333333;
-            transition: background-color 0.3s;
-        }
-        .upgrade:hover {
-            background-color: #3a3a3a;
+        .game-container {
+            background-color: #112240;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 900px;
+            width: 100%;
         }
         h1 {
-            color: #4a90e2;
+            color: #64ffda;
+            font-size: 28px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
-        h3 {
-            color: #4a90e2;
-            margin-top: 0;
+        .resource {
+            font-size: 18px;
+            margin: 15px 0;
+            color: #a8b2d1;
         }
-        #endGameModal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
+        .upgrades-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            gap: 15px;
+        }
+        .upgrade {
+            flex: 1 1 calc(33.333% - 15px);
+            min-width: 220px;
+            margin: 7px 0;
+            padding: 15px;
+            background-color: #1d2d50;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        .upgrade:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(100, 255, 218, 0.1);
+        }
+        .upgrade h3 {
+            font-size: 18px;
+            margin: 0 0 10px 0;
+            color: #64ffda;
+        }
+        .upgrade p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        button {
+            background-color: #3a506b;
+            border: none;
+            color: #64ffda;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 6px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        button:hover {
+            background-color: #4a6785;
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            background-color: #2c3e50;
+            color: #546a7b;
+            cursor: not-allowed;
+        }
+        #spiral-container {
+            width: 250px;
+            height: 250px;
+            margin: 30px auto;
+            position: relative;
+        }
+        #spiral {
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
         }
-        #endGameContent {
-            background-color: #2a2a2a;
-            padding: 40px;
+        #winMessage {
+            background-color: #1d2d50;
+            padding: 20px;
             border-radius: 10px;
-            text-align: center;
+            margin-top: 20px;
+            display: none;
         }
-        #endGameContent p {
-            font-size: 24px;
-            color: #ffffff;
+        #winMessage h2 {
+            color: #64ffda;
+            margin-bottom: 15px;
         }
-        #endGameContent button {
+        
+        .goal-container h2 {
+            color: #64ffda;
+            margin-bottom: 10px;
             font-size: 18px;
-            padding: 10px 20px;
+        }
+        .goal-container p {
+            margin: 5px 0;
+            font-size: 15px;
+        }
+        @media (max-width: 600px) {
+            .upgrade {
+                flex: 1 1 100%;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            .game-container {
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <div id="game-container">
+    <div class="game-container">
         <h1>通往AGI之路</h1>
-        <canvas id="spiral" width="400" height="400"></canvas>
-        <p>研究点数: <span id="researchPoints">0</span></p>
-        <p>每秒研究点数: <span id="pointsPerSecond">1.00</span></p>
-        <button id="research">研究</button>
-        <div id="upgrades">
+        <div class="goal-container">
+            <h2>游戏目标</h2>
+            <p>达到1亿研究点数以实现全面AGI</p>
+            <p>当前进度: <span id="progressPercentage">0.00</span>%</p>
+        </div>
+        <div id="spiral-container">
+            <canvas id="spiral" width="250" height="250"></canvas>
+        </div>
+        <div class="resource">研究点数: <span id="points">0</span></div>
+        <div class="resource">每次点击获得: <span id="pointsPerClick">1.00</span>点</div>
+        <div class="resource">每秒研究点数: <span id="pointsPerSecond">1.00</span></div>
+        <div class="resource">时间加速: <span id="timeAcceleration">1.00</span>x</div>
+        <button id="researchButton">进行研究</button>
+        <div class="upgrades-container">
             <div class="upgrade">
                 <h3>神经网络架构</h3>
-                <p>等级: <span id="aLevel">0</span></p>
-                <p>效果: +<span id="aEffect">1</span> 点/次</p>
-                <p>成本: <span id="aCost">10</span> 点</p>
-                <p>成本增长: 10%</p> <!-- 添加成本增长提示 -->
-                <button onclick="buyUpgrade('a')">升级</button>
+                <p>等级: <span id="neuralNetworkLevel">0</span></p>
+                <p>效果: +<span id="neuralNetworkEffect">1</span>点/次</p>
+                <p>成本: <span id="neuralNetworkCost">10</span>点</p>
+                <button onclick="upgrade('neuralNetwork')">升级</button>
             </div>
             <div class="upgrade">
                 <h3>算法优化</h3>
-                <p>等级: <span id="bLevel">0</span></p>
-                <p>效果: x<span id="bEffect">1.00</span> 倍率</p>
-                <p>成本: <span id="bCost">50</span> 点</p>
-                <p>成本增长: 10%</p> <!-- 添加成本增长提示 -->
-                <button onclick="buyUpgrade('b')">升级</button>
+                <p>等级: <span id="algorithmLevel">0</span></p>
+                <p>效果: x<span id="algorithmEffect">1.00</span>神经网络效率</p>
+                <p>成本: <span id="algorithmCost">50</span>点</p>
+                <button onclick="upgrade('algorithm')">升级</button>
             </div>
             <div class="upgrade">
                 <h3>数据处理能力</h3>
-                <p>等级: <span id="cLevel">0</span></p>
-                <p>效果: +<span id="cEffect">1</span> 点/秒</p>
-                <p>成本: <span id="cCost">100</span> 点</p>
-                <p>成本增长: 10%</p> <!-- 添加成本增长提示 -->
-                <button onclick="buyUpgrade('c')">升级</button>
+                <p>等级: <span id="dataProcessingLevel">0</span></p>
+                <p>效果: +<span id="dataProcessingEffect">1</span>点/秒</p>
+                <p>成本: <span id="dataProcessingCost">100</span>点</p>
+                <button onclick="upgrade('dataProcessing')">升级</button>
             </div>
             <div class="upgrade">
                 <h3>并行计算</h3>
-                <p>等级: <span id="dLevel">0</span></p>
-                <p>效果: x<span id="dEffect">1.00</span> 倍率</p>
-                <p>成本: <span id="dCost">200</span> 点</p>
-                <p>成本增长: 10%</p> <!-- 添加成本增长提示 -->
-                <button onclick="buyUpgrade('d')">升级</button>
+                <p>等级: <span id="parallelComputingLevel">0</span></p>
+                <p>效果: x<span id="parallelComputingEffect">1.00</span>数据处理效率</p>
+                <p>成本: <span id="parallelComputingCost">200</span>点</p>
+                <button onclick="upgrade('parallelComputing')">升级</button>
             </div>
             <div class="upgrade">
                 <h3>认知突破</h3>
-                <p>等级: <span id="eLevel">0</span></p>
-                <p>效果: x<span id="eEffect">1.00</span> 总倍率</p>
-                <p>成本: <span id="eCost">1000</span> 点</p>
-                <p>成本增长: 10%</p> <!-- 添加成本增长提示 -->
-                <button onclick="buyUpgrade('e')">升级</button>
+                <p>等级: <span id="cognitiveBreakthroughLevel">0</span></p>
+                <p>效果: x<span id="cognitiveBreakthroughEffect">1.00</span>神经网络和数据处理效率</p>
+                <p>成本: <span id="cognitiveBreakthroughCost">1000</span>点</p>
+                <button onclick="upgrade('cognitiveBreakthrough')">升级</button>
             </div>
             <div class="upgrade">
                 <h3>量子加速</h3>
-                <p>等级: <span id="fLevel">0</span></p>
-                <p>效果: <span id="fEffect">1.00</span> 次/秒</p>
-                <p>成本: <span id="fCost">5000</span> 点</p>
-                <p>成本增长: 10%</p> <!-- 添加成本增长提示 -->
-                <button onclick="buyUpgrade('f')">升级</button>
+                <p>等级: <span id="quantumAccelerationLevel">0</span></p>
+                <p>效果: x<span id="quantumAccelerationEffect">1.00</span>时间加速</p>
+                <p>成本: <span id="quantumAccelerationCost">5000</span>点</p>
+                <button onclick="upgrade('quantumAcceleration')">升级</button>
             </div>
         </div>
-    </div>
-
-    <!-- 游戏结束模态框 -->
-    <div id="endGameModal">
-        <div id="endGameContent">
-            <p id="endGameMessage">已经达到全面AGI！</p>
-            <button id="continueGame">继续游戏</button>
-            <button id="endGame">结束游戏</button>
+        <button onclick="resetGame()">重置游戏</button>
+        <div id="winMessage">
+            <h2>恭喜！您已经达到全面AGI！</h2>
+            <button onclick="continueGame()">继续游戏</button>
+            <button onclick="endGame()">结束游戏</button>
         </div>
     </div>
 
     <script>
-        let researchPoints = 0;
-        let animationFrame = null;
-        const goalPoints = 100000000; // 1亿点研究目标
-        let startTime = Date.now(); // 游戏开始时间
-
-        const canvas = document.getElementById('spiral');
-        const ctx = canvas.getContext('2d');
-        const researchPointsDisplay = document.getElementById('researchPoints');
-        const pointsPerSecondDisplay = document.getElementById('pointsPerSecond');
-        const researchButton = document.getElementById('research');
-
-        const upgrades = {
-            a: { level: 0, effect: 1, cost: 10, increment: 1 },
-            b: { level: 0, effect: 1, cost: 50, increment: 0.1 },
-            c: { level: 0, effect: 1, cost: 100, increment: 1 }, // 初始效果为 +1 点/秒
-            d: { level: 0, effect: 1, cost: 200, increment: 0.1 },
-            e: { level: 0, effect: 1, cost: 1000, increment: 0.1 },
-            f: { level: 0, effect: 1, cost: 5000, increment: 0.1 }
+        let points = 0;
+        let pointsPerClick = 1;
+        let pointsPerSecond = 1;
+        let timeAcceleration = 1;
+        let time = 0;
+        const GOAL = 1e8; // 1亿
+        let upgrades = {
+            neuralNetwork: { level: 0, effect: 1, cost: 10, growth: 1.1 },
+            algorithm: { level: 0, effect: 1, cost: 50, growth: 1.1 },
+            dataProcessing: { level: 0, effect: 1, cost: 100, growth: 1.1 },
+            parallelComputing: { level: 0, effect: 1, cost: 200, growth: 1.1 },
+            cognitiveBreakthrough: { level: 0, effect: 1, cost: 1000, growth: 1.1 },
+            quantumAcceleration: { level: 0, effect: 1, cost: 5000, growth: 1.1 }
         };
 
-let baseAngle = 0; // 用于控制螺旋的基础角度，确保其持续旋转
-let scaleFactor = 1; // 初始缩放因子
-
-function drawSpiral() {
-    // 清空画布
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // 保存当前状态
-    ctx.save();
-
-    // 控制螺旋增长的因子（基于 researchPoints）
-    const angleFactor = researchPoints * 0.1; // 研究点数越多，螺旋增长越快
-
-    // 动态缩放画布
-    ctx.translate(canvas.width / 2, canvas.height / 2); // 将画布的原点移动到中心
-    ctx.scale(scaleFactor, scaleFactor); // 对整个画布进行缩放
-    ctx.translate(-canvas.width / 2, -canvas.height / 2); // 再把原点移回去
-
-    // 螺旋中心
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-
-    // 控制螺旋的半径增长速度（线性增长）
-    const a = 5;  // 控制初始半径
-    const b = 0.5;  // 控制螺旋的扩展速率
-
-    // 设置最大半径，防止螺旋跑出画布
-    const maxRadiusLimit = Math.min(centerX, centerY) - 10;
-
-    // 绘制螺旋
-    ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-
-    // 根据 researchPoints 控制螺旋角度范围，但加入 baseAngle 实现持续旋转
-    const maxAngle = baseAngle + angleFactor; // maxAngle 会逐渐增加
-
-    for (let angle = baseAngle; angle <= maxAngle; angle += 0.1) {
-        // 线性增长的半径公式，确保螺旋线不会扩展得太快
-        let r = a + b * angle;
-
-        // 限制最大半径
-        r = Math.min(r, maxRadiusLimit);
-
-        // 计算螺旋的 x, y 坐标
-        const x = centerX + r * Math.cos(angle);
-        const y = centerY + r * Math.sin(angle);
-
-        // 设置颜色，随角度变化
-        const hue = (angle * 10) % 360;
-        const lightness = 50 + Math.sin(angle * 0.1) * 20;
-        ctx.strokeStyle = `hsl(${hue}, 100%, ${lightness}%)`;
-
-        // 如果是第一个点，moveTo 到该点，否则 lineTo 连接到该点
-        if (angle === baseAngle) {
-            ctx.moveTo(x, y); // 移动到第一个点
-        } else {
-            ctx.lineTo(x, y); // 连接到后续的点
-        }
-    }
-
-    // 完成螺旋绘制
-    ctx.stroke();
-
-    // 恢复画布状态
-    ctx.restore();
-
-    // 更新 baseAngle，实现持续旋转
-    baseAngle += 0.05;  // 控制旋转速度，可以根据需要调整
-
-    // 更新缩放因子，逐渐缩小画布
-    scaleFactor *= 0.99; // 每次缩小画布，0.99 可以根据需要调整，越接近 1 缩放越慢
-
-    // 请求下一帧绘制
-    animationFrame = requestAnimationFrame(drawSpiral);
-}
-
-        function research() {
-            researchPoints += getPointsPerClick();
-            checkGameEnd();
-            updateDisplay();
-        }
-
-        function getPointsPerClick() {
-            return upgrades.a.effect * upgrades.b.effect * upgrades.e.effect;
-        }
-
-        function getPointsPerSecond() {
-            return upgrades.c.effect * upgrades.d.effect * upgrades.e.effect * upgrades.f.effect;
-        }
-
         function updateDisplay() {
-            researchPointsDisplay.textContent = Math.floor(researchPoints);
-            pointsPerSecondDisplay.textContent = getPointsPerSecond().toFixed(2);
-            for (const [key, upgrade] of Object.entries(upgrades)) {
-                document.getElementById(`${key}Level`).textContent = upgrade.level;
-                document.getElementById(`${key}Effect`).textContent = upgrade.effect.toFixed(2);
-                document.getElementById(`${key}Cost`).textContent = Math.floor(upgrade.cost);
+            document.getElementById('points').textContent = Math.floor(points).toLocaleString();
+            document.getElementById('pointsPerClick').textContent = pointsPerClick.toFixed(2);
+            document.getElementById('pointsPerSecond').textContent = pointsPerSecond.toFixed(2);
+            document.getElementById('timeAcceleration').textContent = timeAcceleration.toFixed(2);
+            document.getElementById('progressPercentage').textContent = (points / GOAL * 100).toFixed(2);
+            for (let upgrade in upgrades) {
+                document.getElementById(upgrade + 'Level').textContent = upgrades[upgrade].level;
+                document.getElementById(upgrade + 'Effect').textContent = upgrades[upgrade].effect.toFixed(2);
+                document.getElementById(upgrade + 'Cost').textContent = Math.floor(upgrades[upgrade].cost).toLocaleString();
             }
         }
 
-        function buyUpgrade(type) {
-            const upgrade = upgrades[type];
-            if (researchPoints >= upgrade.cost) {
-                researchPoints -= upgrade.cost;
-                upgrade.level++;
-                upgrade.effect += upgrade.increment;
-                upgrade.cost *= 1.1; // 成本倍率调整为1.10（每次升级后增加10%）
+        function upgrade(type) {
+            if (points >= upgrades[type].cost) {
+                points -= upgrades[type].cost;
+                upgrades[type].level++;
+                upgrades[type].cost *= upgrades[type].growth;
+                if (type === 'neuralNetwork') upgrades[type].effect++;
+                else if (type === 'algorithm' || type === 'parallelComputing' || type === 'cognitiveBreakthrough') upgrades[type].effect *= 1.1;
+                else if (type === 'dataProcessing') upgrades[type].effect++;
+                else if (type === 'quantumAcceleration') upgrades[type].effect *= 1.1;
+                calculatePointsPerSecond();
+                calculatePointsPerClick();
+                calculateTimeAcceleration();
                 updateDisplay();
             }
         }
 
-        function autoResearch() {
-            researchPoints += getPointsPerSecond() / 10; // 每0.1秒增加十分之一的每秒点数
-            checkGameEnd();
-            updateDisplay();
+        function calculatePointsPerSecond() {
+            let dataProcessingEfficiency = upgrades.dataProcessing.effect * upgrades.parallelComputing.effect * upgrades.cognitiveBreakthrough.effect;
+            pointsPerSecond = dataProcessingEfficiency;
         }
 
-        // 检查是否达到目标点数
-        function checkGameEnd() {
-            if (researchPoints >= goalPoints) {
-                endGame();
+        function calculatePointsPerClick() {
+            let neuralNetworkEfficiency = upgrades.neuralNetwork.effect * upgrades.algorithm.effect * upgrades.cognitiveBreakthrough.effect;
+            pointsPerClick = neuralNetworkEfficiency;
+        }
+
+        function calculateTimeAcceleration() {
+            timeAcceleration = upgrades.quantumAcceleration.effect;
+        }
+
+        function gameLoop() {
+            points += (pointsPerSecond * timeAcceleration) / 10;
+            time += timeAcceleration / 100;
+            updateDisplay();
+            drawSpiral();
+            checkWinCondition();
+        }
+
+        function checkWinCondition() {
+            if (points >= GOAL && document.getElementById('winMessage').style.display === 'none') {
+                document.getElementById('winMessage').style.display = 'block';
             }
         }
 
-        // 结束游戏，显示模态框
+        function continueGame() {
+            document.getElementById('winMessage').style.display = 'none';
+        }
+
         function endGame() {
-            document.getElementById('endGameModal').style.display = 'flex';
-            clearInterval(autoResearchInterval); // 停止自动研究
-            cancelAnimationFrame(animationFrame); // 停止动画
-
-            const timeSpent = formatTimeSpent(Date.now() - startTime); // 计算花费时间
-            document.getElementById('endGameMessage').textContent = `已经达到全面AGI！你花费了 ${timeSpent} 完成游戏。`;
+            alert('感谢您踏上通往AGI之路！');
+            location.reload();
         }
 
-        // 格式化时间为 'xx小时xx分xx秒'
-        function formatTimeSpent(milliseconds) {
-            const seconds = Math.floor(milliseconds / 1000);
-            const minutes = Math.floor(seconds / 60);
-            const hours = Math.floor(minutes / 60);
-            const remainingMinutes = minutes % 60;
-            const remainingSeconds = seconds % 60;
-            return `${hours}小时${remainingMinutes}分${remainingSeconds}秒`;
+        function drawSpiral() {
+            const canvas = document.getElementById('spiral');
+            const ctx = canvas.getContext('2d');
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const maxRadius = Math.min(centerX, centerY) - 10;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.beginPath();
+            ctx.lineWidth = 2;
+
+            const turns = 3 + Math.log(points + 1) / Math.log(10);
+            const pointsPerTurn = 100;
+            const totalPoints = turns * pointsPerTurn;
+
+            for (let i = 0; i <= totalPoints; i++) {
+                const angle = 0.1 * i;
+                const radius = (i / totalPoints) * maxRadius;
+                const x = centerX + radius * Math.cos(angle);
+                const y = centerY + radius * Math.sin(angle);
+
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    const hue = (angle * 10 + time * 5) % 360;
+                    const saturation = 80 + Math.sin(time * 0.1 + angle * 0.5) * 20;
+                    const lightness = 60 + Math.sin(time * 0.2 + angle * 0.3) * 10;
+                    ctx.strokeStyle = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+                    ctx.lineTo(x, y);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                }
+            }
         }
 
-        // 继续游戏
-        document.getElementById('continueGame').addEventListener('click', function() {
-            document.getElementById('endGameModal').style.display = 'none';
-            autoResearchInterval = setInterval(autoResearch, 100); // 恢复自动研究
-            animationFrame = requestAnimationFrame(drawSpiral); // 恢复动画
-        });
+        const researchButton = document.getElementById('researchButton');
+        let isResearching = false;
+        let researchInterval;
 
-        // 结束游戏
-        document.getElementById('endGame').addEventListener('click', function() {
-            alert('游戏结束！感谢你的游玩！');
-            window.location.reload(); // 重新加载页面，重置游戏
-        });
+        function doResearch() {
+            points += pointsPerClick;
+            updateDisplay();
+            checkWinCondition();
+        }
 
         researchButton.addEventListener('mousedown', function() {
-            research();
-            this.interval = setInterval(research, 100);
+            isResearching = true;
+            doResearch();
+            researchInterval = setInterval(doResearch, 100);
         });
 
         researchButton.addEventListener('mouseup', function() {
-            clearInterval(this.interval);
+            isResearching = false;
+            clearInterval(researchInterval);
         });
 
         researchButton.addEventListener('mouseleave', function() {
-            clearInterval(this.interval);
+            if (isResearching) {
+                isResearching = false;
+                clearInterval(researchInterval);
+            }
         });
 
-        // 触摸设备支持
-        researchButton.addEventListener('touchstart', function(e) {
-            e.preventDefault();
-            research();
-            this.interval = setInterval(research, 100);
-        });
+        // 保存和加载游戏功能
+        function saveGame() {
+            const gameState = {
+                points: points,
+                pointsPerClick: pointsPerClick,
+                pointsPerSecond: pointsPerSecond,
+                timeAcceleration: timeAcceleration,
+                upgrades: upgrades,
+                time: time
+            };
+            localStorage.setItem('agiGameState', JSON.stringify(gameState));
+        }
 
-        researchButton.addEventListener('touchend', function() {
-            clearInterval(this.interval);
-        });
+        function loadGame() {
+            const savedGame = localStorage.getItem('agiGameState');
+            if (savedGame) {
+                const gameState = JSON.parse(savedGame);
+                points = gameState.points;
+                pointsPerClick = gameState.pointsPerClick;
+                pointsPerSecond = gameState.pointsPerSecond;
+                timeAcceleration = gameState.timeAcceleration;
+                upgrades = gameState.upgrades;
+                time = gameState.time;
+                updateDisplay();
+                drawSpiral();
+            }
+        }
 
-        let autoResearchInterval = setInterval(autoResearch, 100); // 每0.1秒执行一次自动研究
+        function resetGame() {
+            if (confirm('确定要重置游戏吗？所有进度将丢失。')) {
+                localStorage.removeItem('agiGameState');
+                location.reload();
+            }
+        }
+
+        // 页面加载时恢复进度
+        window.onload = loadGame;
+
+        // 每隔10秒保存一次游戏进度
+        setInterval(saveGame, 10000);
+
+        setInterval(gameLoop, 100);
         updateDisplay();
-        animationFrame = requestAnimationFrame(drawSpiral);
+        drawSpiral();
     </script>
 </body>
 </html>
