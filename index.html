@@ -193,12 +193,9 @@ function drawSpiral(time) {
     // 清空画布
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 控制螺旋增长的因子（仅依据研究点数）
-    const angleFactor = researchPoints * 0.01; // 根据研究点数控制螺旋角度
-
-    // 设置螺旋的最大角度（限制旋转速度）
-    const maxAngleLimit = 1000; // 你可以根据需要调整这个值
-    const maxAngle = Math.min(angleFactor, maxAngleLimit); // 限制最大角度
+    // 控制螺旋增长的因子（基于时间和研究点数）
+    const angleSpeed = 0.01 + researchPoints * 0.001; // 研究点数越多，螺旋增长越快
+    const currentAngle = time * angleSpeed; // 随时间不断增加角度
 
     // 螺旋中心
     const centerX = canvas.width / 2;
@@ -208,20 +205,19 @@ function drawSpiral(time) {
     const a = 10; // 控制初始半径
     const b = 0.1; // 控制螺旋的扩散率
 
-    // 根据最大角度计算最大半径，并缩放到画布大小
-    const maxRadiusLimit = 300; // 你可以根据需要调整这个值
-    const maxRadius = Math.min(Math.exp(b * maxAngle) * a, maxRadiusLimit); // 限制最大半径
-    const scale = Math.min(centerX, centerY) / maxRadius;
-
     // 绘制螺旋
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
 
-    for (let angle = 0; angle <= maxAngle; angle += 0.1) {
-        // 计算螺旋半径
-        const r = Math.exp(b * angle) * a * scale;
+    // 开始路径绘制
+    ctx.beginPath();
 
-        // 计算螺旋的x, y坐标
+    // 动态控制螺旋的增长步长，使得螺旋线可以无限延伸
+    for (let angle = 0; angle <= currentAngle; angle += 0.1) {
+        // 计算螺旋半径
+        const r = Math.exp(b * angle) * a;
+
+        // 计算螺旋的 x, y 坐标
         const x = centerX + r * Math.cos(angle);
         const y = centerY + r * Math.sin(angle);
 
@@ -230,12 +226,16 @@ function drawSpiral(time) {
         const lightness = 50 + Math.sin(angle * 0.1) * 20;
         ctx.strokeStyle = `hsl(${hue}, 100%, ${lightness}%)`;
 
-        // 绘制从中心到螺旋点的线
-        ctx.beginPath();
-        ctx.moveTo(centerX, centerY);
-        ctx.lineTo(x, y);
-        ctx.stroke();
+        // 如果是第一个点，moveTo 到该点，否则 lineTo 连接到该点
+        if (angle === 0) {
+            ctx.moveTo(x, y); // 移动到第一个点
+        } else {
+            ctx.lineTo(x, y); // 连接到后续的点
+        }
     }
+
+    // 完成螺旋绘制
+    ctx.stroke();
 
     // 请求下一帧绘制
     animationFrame = requestAnimationFrame(drawSpiral);
