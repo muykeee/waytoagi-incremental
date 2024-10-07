@@ -189,26 +189,28 @@
             f: { level: 0, effect: 1, cost: 5000, increment: 0.1 }
         };
 
-      function drawSpiral(time) {
+function drawSpiral(time) {
     // 清空画布
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // 控制螺旋增长的因子（仅依据研究点数）
-    const angleFactor = researchPoints * 0.01; // 研究点数越多，螺旋越大
+    const angleFactor = researchPoints * 0.01; // 根据研究点数控制螺旋角度
 
-    // 控制螺旋的最大角度，保持匀速增长
-    const maxAngle = angleFactor;
+    // 设置螺旋的最大角度（限制旋转速度）
+    const maxAngleLimit = 1000; // 你可以根据需要调整这个值
+    const maxAngle = Math.min(angleFactor, maxAngleLimit); // 限制最大角度
 
     // 螺旋中心
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
 
-    // 控制螺旋的半径增长速度（也是匀速）
+    // 控制螺旋的半径增长速度
     const a = 10; // 控制初始半径
     const b = 0.1; // 控制螺旋的扩散率
 
     // 根据最大角度计算最大半径，并缩放到画布大小
-    const maxRadius = Math.exp(b * maxAngle) * a;
+    const maxRadiusLimit = 300; // 你可以根据需要调整这个值
+    const maxRadius = Math.min(Math.exp(b * maxAngle) * a, maxRadiusLimit); // 限制最大半径
     const scale = Math.min(centerX, centerY) / maxRadius;
 
     // 绘制螺旋
@@ -218,7 +220,7 @@
     for (let angle = 0; angle <= maxAngle; angle += 0.1) {
         // 计算螺旋半径
         const r = Math.exp(b * angle) * a * scale;
-        
+
         // 计算螺旋的x, y坐标
         const x = centerX + r * Math.cos(angle);
         const y = centerY + r * Math.sin(angle);
