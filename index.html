@@ -133,6 +133,14 @@
                 padding: 20px;
             }
         }
+
+        /* 防止按钮在手机上长按时缩放 */
+        button, #researchButton {
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
     </style>
 </head>
 <body>
@@ -195,7 +203,7 @@
                 <button onclick="upgrade('quantumAcceleration')">升级</button>
             </div>
         </div>
-        <button onclick="resetGame()">重置游戏</button>
+        <button onclick="resetGame()" id="resetButton">重置游戏</button>
         <div id="winMessage">
             <h2>恭喜！您已经达到全面AGI！</h2>
             <button onclick="continueGame()">继续游戏</button>
